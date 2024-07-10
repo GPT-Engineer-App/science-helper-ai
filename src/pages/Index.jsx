@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useMutation } from "@tanstack/react-query";
 
 const Index = () => {
   const [files, setFiles] = useState([]);
   const [keywords, setKeywords] = useState("");
+  const [report, setReport] = useState(null);
 
   const handleFileChange = (e) => {
     setFiles([...e.target.files]);
@@ -23,6 +25,26 @@ const Index = () => {
   const handleFetch = () => {
     // Handle fetch information logic here
     console.log("Keywords entered:", keywords);
+  };
+
+  const generateReport = useMutation({
+    mutationFn: async () => {
+      // Simulate AI report generation
+      const response = await new Promise((resolve) =>
+        setTimeout(() => resolve({ data: "Generated AI Report based on uploaded files and keywords." }), 2000)
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      setReport(data);
+    },
+    onError: (error) => {
+      console.error("Error generating report:", error);
+    },
+  });
+
+  const handleGenerateReport = () => {
+    generateReport.mutate();
   };
 
   return (
@@ -52,7 +74,7 @@ const Index = () => {
         </section>
 
         {/* Fetch Information Section */}
-        <section>
+        <section className="mb-10">
           <h2 className="text-3xl font-bold mb-4">Fetch Information from the Internet</h2>
           <p className="mb-4">Enter keywords or topics to fetch relevant information from the web.</p>
           <Input
@@ -62,6 +84,21 @@ const Index = () => {
             className="mb-4"
           />
           <Button onClick={handleFetch}>Fetch Information</Button>
+        </section>
+
+        {/* Generate Report Section */}
+        <section>
+          <h2 className="text-3xl font-bold mb-4">Generate Report</h2>
+          <p className="mb-4">Generate a comprehensive report based on the uploaded documents and fetched information.</p>
+          <Button onClick={handleGenerateReport} disabled={generateReport.isLoading}>
+            {generateReport.isLoading ? "Generating Report..." : "Generate Report"}
+          </Button>
+          {report && (
+            <div className="mt-4 p-4 border rounded bg-gray-50">
+              <h3 className="text-2xl font-bold mb-2">Generated Report</h3>
+              <p>{report}</p>
+            </div>
+          )}
         </section>
       </main>
 
